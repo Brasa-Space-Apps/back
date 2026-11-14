@@ -1,0 +1,16 @@
+services:
+  db:
+    image: postgis/postgis:16-3.4
+    container_name: brasa-db
+    environment:
+      POSTGRES_USER: brasa
+      POSTGRES_PASSWORD: brasa
+      POSTGRES_DB: brasa
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./scripts/schema.sql:/docker-entrypoint-initdb.d/01_schema.sql:ro
+
+volumes:
+  pgdata:
