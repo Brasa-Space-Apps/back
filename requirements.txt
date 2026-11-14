@@ -6,6 +6,7 @@ psycopg[binary]>=3.1
 psycopg_pool
 
 shapely>=2
+pyproj
 h3>=4
 pandas
 
