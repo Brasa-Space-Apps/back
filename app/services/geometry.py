@@ -87,4 +87,13 @@ def prepare_area(
 
 def cell_polygon(cell: str) -> dict[str, Any]:
     """Converte um índice H3 em um polígono GeoJSON (Polygon)."""
-    raise NotImplementedError
+    if not h3.is_valid_cell(cell):
+        raise ValueError(f"Célula H3 inválida: {cell!r}")
+
+    boundary = h3.cell_to_boundary(cell)
+    ring = [[lng, lat] for lat, lng in boundary]
+    ring.append(ring[0])
+    return {
+        "type": "Polygon",
+        "coordinates": [ring],
+    }

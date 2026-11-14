@@ -3,10 +3,10 @@ from pathlib import Path
 
 import h3
 import pytest
-from shapely.geometry import shape
+from shapely.geometry import Point, shape
 from shapely.ops import unary_union
 
-from app.services.geometry import AreaOutsidePantanalError, prepare_area
+from app.services.geometry import AreaOutsidePantanalError, cell_polygon, prepare_area
 
 PANTANAL_GEOJSON = Path(__file__).resolve().parents[1] / "data" / "pantanal.geojson"
 
@@ -159,3 +159,28 @@ def test_multipolygon_inside_pantanal(pantanal_boundary):
     assert result.clipped is False
     assert result.n_cells > 0
     assert result.geojson["type"] == "MultiPolygon"
+
+
+def test_cell_polygon_returns_valid_closed_geojson():
+    cell = h3.latlng_to_cell(-18.9, -57.3, 7)
+    poly = cell_polygon(cell)
+
+    assert poly["type"] == "Polygon"
+    assert len(poly["coordinates"]) == 1
+    ring = poly["coordinates"][0]
+    assert len(ring) == 7  # 6 vértices + ponto de fechamento
+    assert ring[0] == ring[-1]
+    assert shape(poly).is_valid
+
+
+def test_cell_polygon_contains_cell_center():
+    cell = h3.latlng_to_cell(-18.9, -57.3, 7)
+    poly = cell_polygon(cell)
+    lat, lng = h3.cell_to_latlng(cell)
+
+    assert shape(poly).contains(Point(lng, lat))
+
+
+def test_cell_polygon_invalid_cell_raises_value_error():
+    with pytest.raises(ValueError):
+        cell_polygon("invalid_h3_index")
