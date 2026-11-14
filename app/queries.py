@@ -38,7 +38,7 @@ FACTORS = """
 
 # Harmonized series for the area by year and month, over the WHOLE history.
 # Dates are intentionally not filtered: monthly medians use the full series.
-# The requested period is applied later, in services/statistics.py.
+# The requested period is applied later, in services/stats.py.
 # Months without fire do NOT appear here: the service fills them with zero.
 # Params: cells (list[str]) -> N rows (year, month, value)
 SERIES_BY_CELLS = """
