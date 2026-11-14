@@ -11,6 +11,45 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./scripts/schema.sql:/docker-entrypoint-initdb.d/01_schema.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U brasa -d brasa"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  seed:
+    build:
+      context: .
+      dockerfile: scripts/Dockerfile.seed
+    container_name: brasa-seed
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://brasa:brasa@db:5432/brasa
+    volumes:
+      - ./scripts:/app/scripts:ro
+      - ./data:/app/data:ro
+    restart: "no"
+    command:
+      - python
+      - -c
+      - |
+        import os, subprocess, sys, psycopg
+
+        tables = ("celulas_dia", "focos_brutos", "limite_pantanal", "fatores")
+        with psycopg.connect(os.environ["DATABASE_URL"]) as con, con.cursor() as cur:
+            populated = all(
+                cur.execute(f"SELECT EXISTS (SELECT 1 FROM {t} LIMIT 1)").fetchone()[0]
+                for t in tables
+            )
+
+        if populated:
+            print("Banco já populado. Pulando carregar_postgis.py.")
+            sys.exit(0)
+
+        print("Banco vazio. Executando carregar_postgis.py...")
+        sys.exit(subprocess.call([sys.executable, "/app/scripts/carregar_postgis.py", "--data", "/app/data"]))
 
 volumes:
   pgdata:
