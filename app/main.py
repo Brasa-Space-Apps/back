@@ -1,3 +1,8 @@
+"""
+Creates the FastAPI app.
+At startup: opens the connection pool and loads into memory what never changes
+(Pantanal boundary, series period, factors).
+"""
 import json
 from contextlib import asynccontextmanager
 
@@ -8,7 +13,7 @@ from shapely.geometry import shape
 from app import queries
 from app.config import FRONT_ORIGINS, UNIT_LABEL
 from app.db import pool
-from app.routers import meta
+from app.routers import density, export, meta, stats
 
 
 @asynccontextmanager
@@ -20,7 +25,7 @@ async def lifespan(app: FastAPI):
         factors = con.execute(queries.FACTORS).fetchall()
 
     boundary_geom = json.loads(boundary_geojson)
-    app.state.boundary = shape(boundary_geom)      
+    app.state.boundary = shape(boundary_geom)
     app.state.series_start = start
     app.state.data_cutoff = end
     app.state.meta = {
@@ -45,7 +50,10 @@ app.add_middleware(
 )
 
 app.include_router(meta.router)
-#colocar os outros routers aqui quando estiverem prontos
+app.include_router(stats.router)
+app.include_router(density.router)
+app.include_router(export.router)
+
 
 @app.get("/health", include_in_schema=False)
 def health():
