@@ -37,19 +37,20 @@ services:
       - |
         import os, subprocess, sys, psycopg
 
-        tables = ("celulas_dia", "focos_brutos", "limite_pantanal", "fatores")
+        tables = ("cell_days", "raw_hotspots", "pantanal_boundary", "factors")
         with psycopg.connect(os.environ["DATABASE_URL"]) as con, con.cursor() as cur:
             populated = all(
-                cur.execute(f"SELECT EXISTS (SELECT 1 FROM {t} LIMIT 1)").fetchone()[0]
+                cur.execute("SELECT to_regclass(%s)", (f"public.{t}",)).fetchone()[0] is not None
+                and cur.execute(f"SELECT EXISTS (SELECT 1 FROM {t} LIMIT 1)").fetchone()[0]
                 for t in tables
             )
 
         if populated:
-            print("Banco já populado. Pulando carregar_postgis.py.")
+            print("Banco já populado. Pulando load_postgis.py.")
             sys.exit(0)
 
-        print("Banco vazio. Executando carregar_postgis.py...")
-        sys.exit(subprocess.call([sys.executable, "/app/scripts/carregar_postgis.py", "--data", "/app/data"]))
+        print("Banco vazio. Executando load_postgis.py...")
+        sys.exit(subprocess.call([sys.executable, "/app/scripts/load_postgis.py", "--data", "/app/data"]))
 
 volumes:
   pgdata:
