@@ -5,6 +5,9 @@
 !.env.example
 !.env.local.example
 
+# ---------- cache dos zips anuais do INPE (scripts/comparar_inpe.py) ----------
+data/inpe_raw/
+
 # ---------- Python ----------
 __pycache__/
 *.py[cod]
