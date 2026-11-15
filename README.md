@@ -110,9 +110,11 @@ back/
 │   └── routers/           # meta, stats, density, export
 ├── scripts/
 │   ├── schema.sql
-│   └── load_postgis.py
+│   ├── load_postgis.py
+│   └── comparar_inpe.py   # year ranking vs INPE's reference satellite (BDQueimadas)
 ├── data/                  # processed data loaded into PostGIS
-├── tests/                 # test_geometry, test_stats, test_routes
+├── docs/                  # results doc (validations run on the real data)
+├── tests/                 # test_geometry, test_stats, test_routes, test_comparacao
 └── docker-compose.yml
 ```
 
@@ -159,7 +161,10 @@ python aplicar_harmonizacao.py --dados dados/pantanal --saida saida
 - **Data cutoff: 31 Dec 2025.** S-NPP data ends on 2 Nov 2026. Extending the series means calibrating NOAA-20 against S-NPP over their overlap (2018 →), with the same C1-day method.
 - **Small areas** (< ~500 km²) carry more uncertainty before 2012; the API returns a warning. The threshold is provisional.
 - **Fire days, not burned area.** Converting to km² burned (MCD64A1 / VNP64A1 + MapBiomas Fogo) is a natural next step, but out of scope for this weekend.
-- The year ranking still has to be cross-checked against INPE's reference-satellite series (BDQueimadas).
+- **Year ranking cross-checked against INPE.** Against the annual hotspot counts of INPE's reference
+  satellite in the Pantanal (BDQueimadas, 2003–2025) the two rankings agree: Spearman 0.981, Kendall 0.905,
+  the same five worst years, and no year more than three positions apart. Full table and discussion in
+  [`docs/resultados.md`](docs/resultados.md).
 
 ---
 
@@ -167,6 +172,8 @@ python aplicar_harmonizacao.py --dados dados/pantanal --saida saida
 
 - **NASA FIRMS** — MODIS Collection 6.1 (Aqua) and VIIRS 375 m (S-NPP) active fire archives. https://firms.modaps.eosdis.nasa.gov
 - **IBGE** — *Biomas e Sistema Costeiro-Marinho do Brasil*, 1:250,000 (2019). https://www.ibge.gov.br/geociencias/
+- **INPE / Programa Queimadas (BDQueimadas)** — annual hotspots of the reference satellite, used to
+  cross-check the year ranking. https://terrabrasilis.dpi.inpe.br/queimadas/portal/
 - **H3** — Uber's hexagonal hierarchical spatial index. https://h3geo.org
 
 ---
