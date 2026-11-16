@@ -26,6 +26,8 @@ Joining the two series naively creates a **false jump in 2012**: the number of d
 
 ## Our approach
 
+Inspired by Chen et al. (2026), _Tracking recent extremes and interannual variability of global fire emissions using a near-real-time extension to the Global Fire Emissions Database_, Earth Syst. Sci. Data 18, 7535–7555, https://doi.org/10.5194/essd-18-7535-2026 — which scales VIIRS active fires to the MODIS-based GFED5 record using factors calibrated over the 2012–2022 overlap. We apply the same overlap-calibration idea in the other direction and at a much finer, local scale.
+
 All the science happens **once, offline**, in a Python pipeline. The API only queries and sums data that is already harmonized, so each request is a lookup, not a recomputation.
 
 1. **Clip** — NASA FIRMS hotspots are clipped to the Brazilian Pantanal (IBGE 2019 biome boundary, 2 km buffer).
